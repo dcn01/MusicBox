@@ -33,6 +33,21 @@ public class Music extends MusicalObject {
                 notifyEnd();
             }
         }
+
+        @Override
+        public void onPause(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onResume(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onCancel(final MusicalObject obj) {
+            //TODO
+        }
     };
 
     public Music(final MusicalContext context) {

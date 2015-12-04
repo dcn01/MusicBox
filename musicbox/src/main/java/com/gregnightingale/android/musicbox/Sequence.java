@@ -28,6 +28,21 @@ public class Sequence extends MusicalObject {
                 playToneAfter(tone);
             }
         }
+
+        @Override
+        public void onPause(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onResume(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onCancel(final MusicalObject obj) {
+            //TODO
+        }
     };
 
     public Sequence(MusicalContext context) {

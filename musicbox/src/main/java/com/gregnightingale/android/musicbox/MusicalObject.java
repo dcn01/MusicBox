@@ -1,7 +1,5 @@
 package com.gregnightingale.android.musicbox;
 
-import android.util.Log;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -48,6 +46,7 @@ abstract public class MusicalObject {
             try {
                 listener.onStart(this);
             } catch (RuntimeException e) {
+                e.printStackTrace();
                 i.remove();
             }
         }
@@ -59,18 +58,46 @@ abstract public class MusicalObject {
             try {
                 listener.onEnd(this);
             } catch (RuntimeException e) {
-                Log.e(this.toString(), "Listener exception: " + e.getStackTrace().toString());
                 e.printStackTrace();
                 i.remove();
             }
         }
     }
 
-    public interface Listener {
-        void onStart(MusicalObject obj);
-
-        void onEnd(MusicalObject obj);
+    protected void notifyPaused() {
+        for (Iterator<Listener> i = listenerList.iterator(); i.hasNext(); ) {
+            Listener listener = i.next();
+            try {
+                listener.onPause(this);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                i.remove();
+            }
+        }
     }
 
+    protected void notifyResumed() {
+        for (Iterator<Listener> i = listenerList.iterator(); i.hasNext(); ) {
+            Listener listener = i.next();
+            try {
+                listener.onResume(this);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                i.remove();
+            }
+        }
+    }
+
+    protected void notifyCancelled() {
+        for (Iterator<Listener> i = listenerList.iterator(); i.hasNext(); ) {
+            Listener listener = i.next();
+            try {
+                listener.onCancel(this);
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                i.remove();
+            }
+        }
+    }
 
 }

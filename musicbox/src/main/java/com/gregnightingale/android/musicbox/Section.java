@@ -28,6 +28,21 @@ public class Section extends MusicalObject {
             }
             bar.removeListener(barListener);
         }
+
+        @Override
+        public void onPause(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onResume(final MusicalObject obj) {
+            //TODO
+        }
+
+        @Override
+        public void onCancel(final MusicalObject obj) {
+            //TODO
+        }
     };
     private String name;
 

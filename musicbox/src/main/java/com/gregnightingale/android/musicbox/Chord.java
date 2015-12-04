@@ -10,25 +10,8 @@ import java.util.Set;
  */
 public class Chord extends MusicalObject {
 
-    private final String tag = this.getClass().getSimpleName();
-    private final boolean debug = false;
     private Set<Note> notes = new HashSet<>();
     private Map<Note, Boolean> hasFinished = new HashMap<>();
-    private Listener listener = new Listener() {
-        @Override
-        public void onStart(final MusicalObject obj) {
-
-        }
-
-        @Override
-        public void onEnd(final MusicalObject note) {
-            note.removeListener(listener);
-            markFinished((Note) note, true);
-            if (isFinished()) {
-                notifyEnd();
-            }
-        }
-    };
 
     public Chord(MusicalContext context) {
         super(context);
@@ -44,31 +27,54 @@ public class Chord extends MusicalObject {
         for (Note n : notes) {
             markFinished(n, false);
             n.addListener(listener);
-            notifyStart();
             n.play();
+            notifyStart();
         }
     }
 
     @Override
     public void pause() {
-        //TODO implement pause
+        for (Note n : notes) {
+            n.pause();
+        }
+        notifyPaused();
     }
 
     @Override
     public void resume() {
-        //TODO implement resume
+        for (Note n : notes) {
+            n.resume();
+        }
+        notifyResumed();
     }
 
     @Override
     public void cancel() {
-        //TODO implement cancel
+        for (Note n : notes) {
+            n.cancel();
+        }
+        notifyCancelled();
     }
+
+    private Listener listener = new Listener() {
+        @Override
+        void onEnd(final MusicalObject obj) {
+            /* if all the notes in this chord have finished playing, then notify listeners
+                that the chord has finished playing.  Mote that it is allowable for a chord
+                to have notes of heterogeneous values (durations).
+             */
+            markFinished((Note) obj, true);
+            if (allNotesHaveFinished()) {
+                notifyEnd();
+            }
+        }
+    };
 
     private void markFinished(Note finishedNote, boolean flag) {
         hasFinished.put(finishedNote, flag);
     }
 
-    private boolean isFinished() {
+    private boolean allNotesHaveFinished() {
         return !hasFinished.values().contains(Boolean.FALSE);
     }
 }

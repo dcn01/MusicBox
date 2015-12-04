@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import java.util.HashSet;
 import java.util.Set;
+import android.os.SystemClock;
 
 /**
  * Created by gregnightingale on 11/2/15.
@@ -12,9 +13,14 @@ public class Beat extends MusicalObject {
 
     private Set<MusicalObject> tones = new HashSet<>();
     private int beatIndex;
+    private long beatTimeRemaining;
+    private long timeMarker;
+    private long beatDuration;
+    private Handler handler;
 
     public Beat(MusicalContext context) {
         super(context);
+        beatDuration = Beat.getDuration(getTempo());
     }
 
     public void add(MusicalObject obj) {
@@ -23,11 +29,14 @@ public class Beat extends MusicalObject {
 
     @Override
     public void play() {
+        handler = new Handler();
+        setTimeMarker();
         for (MusicalObject mo : tones) {
             mo.play();
         }
+        beatTimeRemaining = beatDuration;
+        handler.postAtTime(beatEndRunnable, SystemClock.uptimeMillis() + beatTimeRemaining);
         notifyStart();
-        notifyWhenDone();
     }
 
     @Override
@@ -35,13 +44,20 @@ public class Beat extends MusicalObject {
         for (MusicalObject mo : tones) {
             mo.pause();
         }
+        handler.removeCallbacks(beatEndRunnable);
+        adjustBeatTimeRemaining();
+        notifyPaused();
     }
 
     @Override
     public void resume() {
+        adjustBeatTimeRemaining();
+        setTimeMarker();
         for (MusicalObject mo : tones) {
             mo.resume();
         }
+        handler.postAtTime(beatEndRunnable, SystemClock.uptimeMillis() + beatTimeRemaining);
+        notifyResumed();
     }
 
     @Override
@@ -49,21 +65,28 @@ public class Beat extends MusicalObject {
         for (MusicalObject mo : tones) {
             mo.cancel();
         }
+        handler.removeCallbacks(beatEndRunnable);
+        notifyCancelled();
+        handler = null;
     }
 
-    /**
-     * notify observer when the duration of the beat has
-     * elapsed (not necessarily when the notes are finished
-     * playing.)
-     */
-    private void notifyWhenDone() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                notifyEnd();
-            }
-        }, getDuration(getTempo()));
+    private void setTimeMarker() {
+        timeMarker = android.os.SystemClock.uptimeMillis();
     }
+
+    private void adjustBeatTimeRemaining() {
+        beatTimeRemaining = beatTimeRemaining - (SystemClock.uptimeMillis() - timeMarker);
+        if (beatTimeRemaining < 0) {
+            beatTimeRemaining = 0;
+        }
+    }
+
+    private Runnable beatEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            notifyEnd();
+        }
+    };
 
     /**
      * @param tempo in beats per minute

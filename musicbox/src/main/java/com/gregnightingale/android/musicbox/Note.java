@@ -10,8 +10,6 @@ import android.util.Log;
  */
 public class Note extends MusicalObject {
 
-    private final String tag = this.getClass().getSimpleName();
-    private final boolean debug = true;
     protected AudioTrack audioTrack;
     protected int bufferSize;
     protected byte[] buffer;
@@ -69,7 +67,7 @@ public class Note extends MusicalObject {
         }
 
         if (audioTrack.getState() == AudioTrack.STATE_UNINITIALIZED) {
-            Log.e(tag, "AudioTrack not initialized!");
+            Log.e(this.toString(), "AudioTrack not initialized!");
         }
 
         if (audioTrack.getState() == AudioTrack.STATE_NO_STATIC_DATA) {
@@ -96,18 +94,20 @@ public class Note extends MusicalObject {
     @Override
     public void pause() {
         audioTrack.pause();
+        notifyPaused();
     }
 
     @Override
     public void resume() {
         audioTrack.play();
+        notifyResumed();
     }
 
     @Override
     public void cancel() {
         audioTrack.pause();
         audioTrack.flush();
-        audioTrack.stop();
+        notifyCancelled();
     }
 
     public int getDuration() {
